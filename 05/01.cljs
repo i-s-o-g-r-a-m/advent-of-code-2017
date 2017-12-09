@@ -16,8 +16,8 @@
 (defn jump
   [v idx]
   (let
-    [val (nth v idx)]
-    {:v (assoc v idx (+ val 1)) :idx (+ idx val)}))
+    [value (nth v idx)]
+    {:v (assoc v idx (+ value 1)) :idx (+ idx value)}))
 
 (defn start
   ([v] (start v 0 1))
