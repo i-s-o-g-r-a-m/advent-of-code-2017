@@ -11904,6 +11904,18 @@ var _user$project$Input$input = {
 		}
 	}
 };
+var _user$project$ProcessInput$getCurrentMax = function (dict) {
+	var r = A3(
+		_elm_lang$core$Dict$foldl,
+		F3(
+			function (k, v, acc) {
+				return (_elm_lang$core$Native_Utils.cmp(v, acc) > 0) ? v : acc;
+			}),
+		0,
+		dict);
+	var dbg = A2(_elm_lang$core$Debug$log, 'currentMax', r);
+	return r;
+};
 var _user$project$ProcessInput$evalCond = F3(
 	function (leftOperand, op, rightOperand) {
 		var _p0 = op;
@@ -11937,31 +11949,47 @@ var _user$project$ProcessInput$updateState = F2(
 		var condVal = A2(_user$project$ProcessInput$lookup, instruct.condRegister, state);
 		var cond = A3(_user$project$ProcessInput$evalCond, condVal, instruct.condOperation, instruct.condValue);
 		if (!cond) {
-			return state;
+			return {ctor: '_Tuple2', _0: state, _1: curVal};
 		} else {
 			var _p1 = instruct.operation;
 			switch (_p1) {
 				case 'inc':
-					return A3(_elm_lang$core$Dict$insert, instruct.register, curVal + instruct.value, state);
+					var newVal = curVal + instruct.value;
+					return {
+						ctor: '_Tuple2',
+						_0: A3(_elm_lang$core$Dict$insert, instruct.register, newVal, state),
+						_1: newVal
+					};
 				case 'dec':
-					return A3(_elm_lang$core$Dict$insert, instruct.register, curVal - instruct.value, state);
+					var newVal = curVal - instruct.value;
+					return {
+						ctor: '_Tuple2',
+						_0: A3(_elm_lang$core$Dict$insert, instruct.register, newVal, state),
+						_1: newVal
+					};
 				default:
-					return state;
+					return {ctor: '_Tuple2', _0: state, _1: 0};
 			}
 		}
 	});
-var _user$project$ProcessInput$process_ = F2(
-	function (instructions, state) {
+var _user$project$ProcessInput$process_ = F3(
+	function (instructions, state, maxVal) {
 		process_:
 		while (true) {
 			var _p2 = instructions;
 			if (_p2.ctor === '[]') {
-				return state;
+				return {ctor: '_Tuple2', _0: state, _1: maxVal};
 			} else {
+				var _p3 = A2(_user$project$ProcessInput$updateState, _p2._0, state);
+				var newState = _p3._0;
+				var newVal = _p3._1;
+				var newMax = (_elm_lang$core$Native_Utils.cmp(newVal, maxVal) > 0) ? newVal : maxVal;
 				var _v3 = _p2._1,
-					_v4 = A2(_user$project$ProcessInput$updateState, _p2._0, state);
+					_v4 = newState,
+					_v5 = newMax;
 				instructions = _v3;
 				state = _v4;
+				maxVal = _v5;
 				continue process_;
 			}
 		}
@@ -12026,15 +12054,21 @@ var _user$project$ProcessInput$process = function (input) {
 					line);
 			},
 			input));
-	var result = A2(_user$project$ProcessInput$process_, instructions, _elm_lang$core$Dict$empty);
-	return A3(
-		_elm_lang$core$Dict$foldl,
-		F3(
-			function (k, v, acc) {
-				return (_elm_lang$core$Native_Utils.cmp(v, acc) > 0) ? v : acc;
-			}),
-		0,
-		result);
+	var _p4 = A3(_user$project$ProcessInput$process_, instructions, _elm_lang$core$Dict$empty, 0);
+	var result = _p4._0;
+	var maxVal = _p4._1;
+	return {
+		ctor: '_Tuple2',
+		_0: A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, v, acc) {
+					return (_elm_lang$core$Native_Utils.cmp(v, acc) > 0) ? v : acc;
+				}),
+			0,
+			result),
+		_1: maxVal
+	};
 };
 var _user$project$Main$view = function (model) {
 	return A2(
@@ -12042,7 +12076,7 @@ var _user$project$Main$view = function (model) {
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text('The answer should be 5221: '),
+			_0: _elm_lang$html$Html$text('The answers should be 5221 (part 1) and 7491 (part 2): '),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$html$Html$text(

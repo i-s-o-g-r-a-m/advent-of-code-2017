@@ -16,7 +16,7 @@ main =
 
 
 type alias Model =
-    { output : Int }
+    { output : ( Int, Int ) }
 
 
 initialModel : Model
@@ -47,4 +47,7 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [] [ text "The answer should be 5221: ", text (toString model.output) ]
+    div []
+        [ text "The answers should be 5221 (part 1) and 7491 (part 2): "
+        , text (toString model.output)
+        ]

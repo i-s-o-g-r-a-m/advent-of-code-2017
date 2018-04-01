@@ -1,5 +1,6 @@
 module ProcessInput exposing (process)
 
+import Debug exposing (..)
 import Dict exposing (empty, update, insert)
 import Regex exposing (regex, split)
 import Maybe exposing (withDefault)
@@ -61,39 +62,76 @@ updateState instruct state =
             lookup instruct.register state
     in
         if not cond then
-            state
+            ( state, curVal )
         else
             case instruct.operation of
                 "inc" ->
-                    Dict.insert instruct.register (curVal + instruct.value) state
+                    let
+                        newVal =
+                            curVal + instruct.value
+                    in
+                        ( (Dict.insert instruct.register newVal state), newVal )
 
                 "dec" ->
-                    Dict.insert instruct.register (curVal - instruct.value) state
+                    let
+                        newVal =
+                            curVal - instruct.value
+                    in
+                        ( (Dict.insert instruct.register newVal state), newVal )
 
                 _ ->
-                    state
+                    ( state, 0 )
 
 
-process_ instructions state =
+getCurrentMax dict =
+    let
+        r =
+            Dict.foldl
+                (\k v acc ->
+                    if v > acc then
+                        v
+                    else
+                        acc
+                )
+                0
+                dict
+
+        dbg =
+            Debug.log "currentMax" r
+    in
+        r
+
+
+process_ instructions state maxVal =
     case instructions of
         [] ->
-            state
+            ( state, maxVal )
 
         head :: tail ->
-            process_ tail (updateState head state)
+            let
+                ( newState, newVal ) =
+                    (updateState head state)
+
+                newMax =
+                    if newVal > maxVal then
+                        newVal
+                    else
+                        maxVal
+            in
+                process_ tail newState newMax
 
 
-process : List String -> Int
+process : List String -> ( Int, Int )
 process input =
     let
         instructions =
             List.map toRecord
                 (List.map (\line -> split Regex.All (regex " ") line) input)
 
-        result =
-            process_ instructions Dict.empty
+        ( result, maxVal ) =
+            process_ instructions Dict.empty 0
     in
-        Dict.foldl
+        ( (Dict.foldl
             (\k v acc ->
                 if v > acc then
                     v
@@ -102,3 +140,6 @@ process input =
             )
             0
             result
+          )
+        , maxVal
+        )
