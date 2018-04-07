@@ -19,6 +19,6 @@ Observations:
 
 Other languages to consider in the future:
 * Coconut
-* Go (😬)
+* Go 😬
 * Kotlin
 * C
