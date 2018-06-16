@@ -1,4 +1,4 @@
-from numpy import matrix, append, concatenate as npcat
+from numpy import matrix, concatenate as npcat
 
 
 class S:
@@ -23,8 +23,8 @@ class S:
 
     def populate_spiral(self):
         new_m = npcat((matrix('0 ' * len(self.m[0].A[0])), self.m), axis=0)
-        new_m = npcat((new_m, matrix( ('0 ;' * len(new_m))[:-1])), axis=1)
-        new_m = npcat((matrix( ('0 ;' * len(new_m))[:-1]), new_m), axis=1)
+        new_m = npcat((new_m, matrix(('0 ;' * len(new_m))[:-1])), axis=1)
+        new_m = npcat((matrix(('0 ;' * len(new_m))[:-1]), new_m), axis=1)
         new_m = npcat((new_m, matrix('0 ' * len(new_m[0].A[0]))), axis=0)
         self.m = new_m
 
@@ -62,8 +62,6 @@ class S:
             spiral_len = len(self.spiral())
             side_len = int(spiral_len // 4)
             self.populate_spiral()
-
-            new_cell_vals = []
 
             for side in range(0, 4):
                 for c in range(1, side_len + 1):
