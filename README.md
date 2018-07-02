@@ -18,7 +18,9 @@ Observations:
 * I really do like functional programming. Going back to clumsy and impure styles of OO feels bad after immersing oneself in languages that encourage functional approaches.
 
 Other languages to consider in the future:
-* Coconut
-* Go 😬
+* Go
 * Kotlin
 * C
+* OCaml
+* Swift
+* Coconut
