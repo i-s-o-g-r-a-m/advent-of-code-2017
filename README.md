@@ -4,9 +4,10 @@ It's well into 2018 and I'm still chipping away. I sure hope to finish by the ti
 the 2018 edition arrives.
 
 Languages used so far:
-* ClojureScript (via planck)
+* ClojureScript
 * Elixir
 * Elm
+* Go
 * Python
 
 Observations:
@@ -16,11 +17,12 @@ Observations:
 * Having automatic code formatting (as you do with Elm and now Elixir), especially when it is integrated into your editor on save, is so great.
 * When the going gets tough, and because I'm trying to solve the problems as fast as possible, my brain reaches for Python. It seems like I can brute-force a solution in heavily-imperative Python when other avenues are failing me. This is a bit disappointing and not at all surprising. I still like Python and still think it's probably the best choice for beginners.
 * I really do like functional programming. Going back to clumsy and impure styles of OO feels bad after immersing oneself in languages that encourage functional approaches.
+* I'm struggling to find a lot to like with Go. It's fast, but it seems to encourage behavior that feels dirty. I'll try to withhold judgment until I have done more.
 
 Other languages to consider in the future:
-* Go
+* OCaml
+* Reason
 * Kotlin
 * C
-* OCaml
 * Swift
 * Coconut
