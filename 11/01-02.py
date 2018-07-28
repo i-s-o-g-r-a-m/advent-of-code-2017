@@ -6,6 +6,8 @@ def traverse_grid(input):
         'w': [-1, 0],
     }
 
+    max_distance = 0
+
     coords = [0, 0]
     for i, move in enumerate(input):
         odd = abs(coords[0]) % 2
@@ -18,7 +20,10 @@ def traverse_grid(input):
         else:
             d = directions[move]
         coords = [coords[0] + d[0], coords[1] + d[1]]
-    return coords
+        dist = go_home(coords)
+        if dist > max_distance:
+            max_distance = dist
+    return (coords, max_distance)
 
 
 def find_direction(from_pos, to_pos):
@@ -78,10 +83,12 @@ def go_home(position):
 
 def main():
     initial_moves = open('input.txt').read().strip().split(',')
-    position = traverse_grid(initial_moves)
+    position, max_dist = traverse_grid(initial_moves)
     return_home_steps = go_home(position)
     print(return_home_steps)
+    print(max_dist)
     assert return_home_steps == 773
+    assert max_dist == 1560
 
 
 if __name__ == '__main__':
