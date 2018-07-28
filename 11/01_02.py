@@ -1,21 +1,16 @@
 def traverse_grid(input):
-    directions = {
-        's': [0, 1],
-        'n': [0, -1],
-        'e': [1, 0],
-        'w': [-1, 0],
-    }
+    directions = {"s": [0, 1], "n": [0, -1], "e": [1, 0], "w": [-1, 0]}
 
     max_distance = 0
 
     coords = [0, 0]
-    for i, move in enumerate(input):
+    for move in input:
         odd = abs(coords[0]) % 2
         if len(move) == 2:
             d = [x[0] + x[1] for x in zip(directions[move[1]], directions[move[0]])]
-            if not odd and move[0] == 's':
+            if not odd and move[0] == "s":
                 d = [d[0], d[1] - 1]
-            if odd and move[0] == 'n':
+            if odd and move[0] == "n":
                 d = [d[0], d[1] + 1]
         else:
             d = directions[move]
@@ -23,23 +18,24 @@ def traverse_grid(input):
         dist = go_home(coords)
         if dist > max_distance:
             max_distance = dist
+
     return (coords, max_distance)
 
 
 def find_direction(from_pos, to_pos):
     if from_pos == to_pos:
-        raise Exception('...')
-    lat, lng = '', ''
+        raise Exception("...")
+    lat, lng = "", ""
     if from_pos[1] > to_pos[1]:
-        lat = 'n'
+        lat = "n"
     elif from_pos[1] < to_pos[1]:
-        lat = 's'
+        lat = "s"
     if from_pos[0] > to_pos[0]:
-        lng = 'w'
+        lng = "w"
     elif from_pos[0] < to_pos[0]:
-        lng = 'e'
+        lng = "e"
     direction = lat + lng
-    assert direction != ''
+    assert direction != ""
     return direction
 
 
@@ -55,34 +51,37 @@ def go_home(position):
 
         if 0 in position and not diagonal_done:
             direction = find_direction(from_pos=position, to_pos=(0, 0))
+            diagonal_done = True
 
         if len(direction) == 2:
-            if direction == 'ne':
+            if direction == "ne":
                 position = [position[0] + 1, position[1] - 1 if even else position[1]]
-            elif direction == 'nw':
+            elif direction == "nw":
                 position = [position[0] - 1, position[1] - 1 if even else position[1]]
-            elif direction == 'sw':
+            elif direction == "sw":
                 position = [position[0] - 1, position[1] + 1 if even else position[1]]
-            elif direction == 'se':
+            elif direction == "se":
                 position = [position[0] + 1, position[1] + 1 if even else position[1]]
+            else:
+                raise Exception("unknown direction {}".format(direction))
         else:
             assert len(direction) == 1
-            if direction == 's':
+            if direction == "s":
                 position = [position[0], position[1] + 1]
-            elif direction == 'n':
+            elif direction == "n":
                 position = [position[0], position[1] - 1]
-            elif direction == 'e':
+            elif direction == "e":
                 position = [position[0] + 1, position[1]]
-            elif direction == 'w':
+            elif direction == "w":
                 position = [position[0] - 1, position[1]]
             else:
-                raise Exception('unknown direction {}'.format(direction))
+                raise Exception("unknown direction {}".format(direction))
 
     return moves
 
 
 def main():
-    initial_moves = open('input.txt').read().strip().split(',')
+    initial_moves = open("input.txt").read().strip().split(",")
     position, max_dist = traverse_grid(initial_moves)
     return_home_steps = go_home(position)
     print(return_home_steps)
@@ -91,5 +90,5 @@ def main():
     assert max_dist == 1560
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
