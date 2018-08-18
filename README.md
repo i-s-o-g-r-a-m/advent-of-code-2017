@@ -7,7 +7,7 @@ In general, because of limited free time, I try to solve the puzzles as fast as
 possible. This usually means we end up with write-only code, low abstraction,
 no bench-marking or optimization, little regard to factoring, no tests.
 
-The puzzle-solving aspect makes the process slightly more rewarding that stuff like
+The puzzle-solving aspect makes the process slightly more rewarding than stuff like
 Exercism, though I still enjoy Exercism-style exercises quite a bit, too.
 
 Languages used so far:
