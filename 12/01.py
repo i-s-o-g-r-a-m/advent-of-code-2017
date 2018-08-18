@@ -25,10 +25,9 @@ class Graph:
     def get_or_create_node(self, node_val):
         if node_val in [x.val for x in self.nodes]:
             return [x for x in self.nodes if x.val == node_val][0]
-        else:
-            n = Node(node_val)
-            self.nodes.append(n)
-            return n
+        n = Node(node_val)
+        self.nodes.append(n)
+        return n
 
     @staticmethod
     def walk(node, nodes=None):
@@ -53,9 +52,9 @@ def main():
             v_node = g.get_or_create_node(v)
             k_node.add_conn(v_node)
 
-    full_walk = g.walk(g.root)
-    assert len(full_walk) == 306
-    print(len(full_walk))
+    nodes = g.walk(g.root)
+    assert len(nodes) == 306
+    print(len(nodes))
 
 
 if __name__ == "__main__":
