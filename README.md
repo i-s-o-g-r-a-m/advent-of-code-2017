@@ -18,8 +18,8 @@ Languages used so far:
 * Python
 
 Observations:
-* Elm's compiler is still a lot of fun to use.
-* `planck` makes ClojureScript easy and fun, I really enjoyed using it.
+* Elm's compiler is still a lot of fun.
+* `planck` makes ClojureScript easy and friction-less, I really enjoyed it.
 * Elixir, well, I'm somewhat equivocal on, though it has some cool stuff, and the docs are quite good. I'm going to do more of it.
 * Having automatic code formatting (as you do with Elm and now Elixir), especially when it is integrated into your editor on save, is so great.
 * When the going gets tough, and because I'm trying to solve the problems as fast as possible, my brain reaches for Python. It seems like I can brute-force a solution in heavily-imperative Python when other avenues are failing me. This is a bit disappointing and not at all surprising. I still like Python and still think it's probably the best choice for beginners.
