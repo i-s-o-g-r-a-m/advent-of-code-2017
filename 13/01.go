@@ -46,7 +46,7 @@ func main() {
 	for tick := minDepth; tick <= maxDepth; tick++ {
 		depth := layers[tick]
 		if depth != 0 {
-			pos := tick % ((layers[tick] * 2) - 2)
+			pos := tick % ((depth * 2) - 2)
 			if pos == 0 {
 				severity += tick * depth
 			}
