@@ -15,6 +15,7 @@ Languages used so far:
 * Elixir
 * Elm
 * Go
+* OCaml
 * Python
 
 Observations:
@@ -26,9 +27,9 @@ Observations:
 * I really do like functional programming. Going back to clumsy and impure styles of OO feels bad after immersing oneself in languages that encourage functional approaches.
 * I'm struggling to find a lot to like with Go. It's fast, but it seems to encourage behavior that feels dirty. I'll try to withhold judgment until I have done more.
 * I'd forgotten how helpful it can be to sketch a rough diagram on paper, especially when trying to visualize a data structure. And the higher rez and greater control afforded by pencil on paper, by comparison to marker on whiteboard, seems notable.
+* The OCaml tooling and docs take a bit of effort to get going with, and in my case, editor support isn't excellent. Having some Elm experience is proving useful when it comes to making the language feel less alien than it might otherwise (though the compiler messages leave a lot to be desired by comparison to Elm). It will be interesting to compare the overall experience against Reason&#8217;s. I'm finding that `ocamlformat` is pretty nice.
 
 Languages to consider in the future:
-* OCaml
 * Reason
 * Kotlin
 * C
