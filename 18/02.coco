@@ -1,0 +1,199 @@
+#!/usr/bin/env coconut-run --strict
+import multiprocessing
+import queue
+from collections import defaultdict, deque
+
+
+
+def clean_input(cls, *args):
+    cleaned_args = []
+    for a in args:
+        try:
+            cleaned_args.append(int(a))
+        except ValueError:
+            cleaned_args.append(a)
+    return makedata(cls, *cleaned_args)
+
+
+data snd(reg_or_val):
+    """
+    sends a value or the value of the register referenced
+    """
+    __new__ = clean_input
+
+
+data set_(register, val):
+    """
+    sets `register` to `val`
+    """
+    __new__ = clean_input
+
+
+data add(register, val):
+    """
+    increases `register`'s current value by `val`
+    """
+    __new__ = clean_input
+
+
+data mul(register, val):
+    """
+    sets `register` to the result of multiplying its current value by `val`
+    """
+    __new__ = clean_input
+
+
+data mod(register, val):
+    """
+    sets `register` to its current value modulo `val`
+    """
+    __new__ = clean_input
+
+
+data rcv(register):
+    """
+    receives the next available value and stores it in `register`
+    """
+    __new__ = clean_input
+
+
+data jgz(reg_or_val, offset):
+    """
+    jumps by `offset`, but only if `reg_or_val` > 0
+    """
+    __new__ = clean_input
+
+
+def parse(raw, accum=None):
+    accum = accum or []
+    if not raw:
+        return accum
+    head, *tail = raw[0].split()
+    case head:
+        match 'snd':
+            accum.append(snd(*tail))
+        match 'set':
+            accum.append(set_(*tail))
+        match 'add':
+            accum.append(add(*tail))
+        match 'mul':
+            accum.append(mul(*tail))
+        match 'mod':
+            accum.append(mod(*tail))
+        match 'rcv':
+            accum.append(rcv(*tail))
+        match 'jgz':
+            accum.append(jgz(*tail))
+    else:
+        raise TypeError("Unknown instruction: {}".format(head))
+    return parse(raw[1:], accum)
+
+
+instructions = open('input.txt').read().strip().split('\n') |> parse |> list
+
+
+def process(
+        pos=0,
+        state=None,
+        prog_id=None,
+        my_queue=None,
+        target_queue=None,
+        send_counter=None
+    ):
+    if pos > len(instructions) - 1:
+        return (None, None, None)
+    current = instructions[pos]
+    jump = pos + 1
+    waiting = False
+    case current:
+        match snd(reg_or_val is int):
+            send_counter.value += 1
+            target_queue.put(reg_or_val)
+        match snd(reg_or_val is str):
+            send_counter.value += 1
+            target_queue.put(state[reg_or_val])
+        match set_(register, val is int):
+            state[register] = val
+        match set_(register, val is str):
+            state[register] = state[val]
+        match add(register, val is int):
+            state[register] = state[register] + val
+        match add(register, val is str):
+            state[register] = state[register] + state[val]
+        match mul(register, val is int):
+            state[register] = state[register] * val
+        match mul(register, val is str):
+            state[register] = state[register] * state[val]
+        match mod(register, val is int):
+            state[register] = state[register] % val
+        match mod(register, val is str):
+            state[register] = state[register] % state[val]
+        match jgz(register is int, offset is int):
+            if register > 0:
+                jump = pos + offset
+        match jgz(register is int, offset is str):
+            if register > 0:
+                jump = pos + state[offset]
+        match jgz(register is str, offset is str):
+            if state[register] > 0:
+                jump = pos + state[offset]
+        match jgz(register is str, offset is int):
+            if state[register] > 0:
+                jump = pos + offset
+        match rcv(register):
+            try:
+                state[register] = my_queue.get(False)
+            except queue.Empty:
+                jump = jump - 1
+                waiting = True
+    else:
+        raise TypeError(current)
+    return (jump, state, waiting)
+
+
+def run_program(prog_id, blocked, my_queue, target_queue, send_counter):
+    pos = 0
+    state = defaultdict((-> 0))
+    state['p'] = prog_id
+    blocked[prog_id] = 0
+
+    while True:
+        pos, state, waiting = process(
+            pos=pos,
+            state=state,
+            prog_id=prog_id,
+            my_queue=my_queue,
+            target_queue=target_queue,
+            send_counter=send_counter
+        )
+        if pos is None:
+            return state
+        blocked[prog_id] = 1 if waiting else 0
+        if sum(blocked.values()) == 2:
+            return state
+
+
+def main():
+    m = multiprocessing.Manager()
+    blocked = m.dict()
+    queue0 = m.Queue()
+    queue1 = m.Queue()
+    send_counter0 = m.Value('i', 0)
+    send_counter1 = m.Value('i', 0)
+
+    p0 = multiprocessing.Process(
+        target=run_program, args=(0, blocked, queue0, queue1, send_counter0)
+    )
+    p1 = multiprocessing.Process(
+        target=run_program, args=(1, blocked, queue1, queue0, send_counter1)
+    )
+
+    p0.start()
+    p1.start()
+    p0.join()
+    p1.join()
+
+    print(send_counter1.value)
+    assert send_counter1.value == 5969, "wrong answer"
+
+main()
