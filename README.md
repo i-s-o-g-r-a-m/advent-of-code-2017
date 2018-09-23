@@ -1,9 +1,7 @@
 # Advent of Code 2017
 
-It's well into 2018 and I'm still chipping away. I sure hope to finish by the time
-the 2018 edition arrives.
-
-In general, because of limited free time, I try to solve the puzzles as fast as
+I'm mainly using this as an avenue for exploring different languages. In general,
+because of limited free time, I try to solve the puzzles as fast as
 possible. This usually means we end up with write-only code, low abstraction,
 no bench-marking or optimization, little regard to factoring, no tests.
 
