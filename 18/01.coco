@@ -1,0 +1,135 @@
+#!/usr/bin/env coconut-run --strict
+
+
+from collections import defaultdict
+
+
+def clean_input(cls, *args):
+    cleaned_args = []
+    for a in args:
+        try:
+            cleaned_args.append(int(a))
+        except ValueError:
+            cleaned_args.append(a)
+    return makedata(cls, *cleaned_args)
+
+
+data snd(register):
+    """
+    plays a sound with a frequency equal to the value of `register`
+    """
+    __new__ = clean_input
+
+
+data set_(register, val):
+    """
+    sets `register` to `val`
+    """
+    __new__ = clean_input
+
+
+data add(register, val):
+    """
+    increases `register`'s current value by `val`
+    """
+    __new__ = clean_input
+
+
+data mul(register, val):
+    """
+    sets `register` to the result of multiplying its current value by `val`
+    """
+    __new__ = clean_input
+
+
+data mod(register, val):
+    """
+    sets `register` to its current value modulo `val`
+    """
+    __new__ = clean_input
+
+
+data rcv(val):
+    """
+    recovers the registeruency of the last sound played if val != 0
+    """
+    __new__ = clean_input
+
+
+data jgz(register, offset):
+    """
+    jumps by `offset`, but only if `val` > 0
+    """
+    __new__ = clean_input
+
+
+def parse(raw, accum=None):
+    accum = accum or []
+    if not raw:
+        return accum
+    head, *tail = raw[0].split()
+    case head:
+        match 'snd':
+            accum.append(snd(*tail))
+        match 'set':
+            accum.append(set_(*tail))
+        match 'add':
+            accum.append(add(*tail))
+        match 'mul':
+            accum.append(mul(*tail))
+        match 'mod':
+            accum.append(mod(*tail))
+        match 'rcv':
+            accum.append(rcv(*tail))
+        match 'jgz':
+            accum.append(jgz(*tail))
+    else:
+        raise TypeError("Unknown instruction: {}".format(head))
+    return parse(raw[1:], accum)
+
+
+def process(instructions, pos=0, state=None):
+    state = state or defaultdict((-> 0))
+    if pos >= len(instructions) - 1:
+        return
+    current = instructions[pos]
+    jump = pos + 1
+    case current:
+        match snd(register):
+            state["sound"] = state[register]
+        match set_(register, val is int):
+            state[register] = val
+        match set_(register, val is str):
+            state[register] = state[val]
+        match add(register, val is int):
+            state[register] = state[register] + val
+        match add(register, val is str):
+            state[register] = state[register] + state[val]
+        match mul(register, val is int):
+            state[register] = state[register] * val
+        match mul(register, val is str):
+            state[register] = state[register] * state[val]
+        match mod(register, val is int):
+            state[register] = state[register] % val
+        match mod(register, val is str):
+            state[register] = state[register] % state[val]
+        match jgz(register, offset is int):
+            if state[register] > 0:
+                jump = pos + offset
+        match jgz(register, offset is str):
+            if state[register] > 0:
+                jump = pos + state[offset]
+        match rcv(register):
+            if state[register] > 0:
+                return state["sound"]
+    else:
+        raise TypeError(current)
+    return process(instructions, jump, state)
+
+
+freq = (
+    open('input.txt').read().strip().split('\n') |>
+    parse |>
+    process
+)
+assert freq == 1187, "wrong answer"
