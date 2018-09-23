@@ -12,6 +12,7 @@ Exercism, though I still enjoy Exercism-style exercises quite a bit, too.
 
 Languages used so far:
 * ClojureScript
+* Coconut
 * Elixir
 * Elm
 * Go
@@ -29,9 +30,9 @@ Observations:
 * I'd forgotten how helpful it can be to sketch a rough diagram on paper, especially when trying to visualize a data structure. And the higher rez and greater control afforded by pencil on paper, by comparison to marker on whiteboard, seems notable.
 * The OCaml tooling and docs take a bit of effort to get going with, and in my case, editor support isn't excellent. Having some Elm experience is proving useful when it comes to making the language feel less alien than it might otherwise (though the compiler messages leave a lot to be desired by comparison to Elm). It will be interesting to compare the overall experience against Reason&#8217;s. I'm finding that `ocamlformat` is pretty nice.
 
-Languages to consider in the future:
+TODO, in order of likelihood:
 * Reason
+* Swift
+* Rust
 * Kotlin
 * C
-* Swift
-* Coconut
