@@ -49,9 +49,9 @@ data mod(register, val):
     __new__ = clean_input
 
 
-data rcv(val):
+data rcv(register):
     """
-    recovers the registeruency of the last sound played if val != 0
+    recovers the value of the last sound played if the value of the register != 0
     """
     __new__ = clean_input
 
@@ -120,7 +120,7 @@ def process(instructions, pos=0, state=None):
             if state[register] > 0:
                 jump = pos + state[offset]
         match rcv(register):
-            if state[register] > 0:
+            if state[register] != 0:
                 return state["sound"]
     else:
         raise TypeError(current)
