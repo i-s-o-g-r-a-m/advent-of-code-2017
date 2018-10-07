@@ -16,6 +16,7 @@ Languages used so far:
 * Go
 * OCaml
 * Python
+* Ruby
 
 Observations:
 * Elm's compiler is still a lot of fun.
