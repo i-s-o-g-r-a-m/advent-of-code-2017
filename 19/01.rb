@@ -1,6 +1,3 @@
-# TODO extract 'direction' value class
-# TODO extract 'value' value class
-
 class MatrixBoundsError < StandardError
   def initialize(msg = "Exceeded the matrix's bounds")
     super
@@ -25,12 +22,40 @@ class RouteUnexpectedJunction < StandardError
   end
 end
 
+class Cell
+  CORNER_CHAR = '+'
+  LETTER = /[A-Z]/
+
+  attr_reader :value
+
+  def initialize(cell_value, cell_coords)
+    @value = cell_value
+    @coords = cell_coords
+    @value.freeze
+    @coords.freeze
+  end
+
+  def empty?
+    @value.nil? || @value.strip.empty?
+  end
+
+  def corner?
+    @value == CORNER_CHAR
+  end
+
+  def letter?
+    @value.match(LETTER)
+  end
+end
+
 class Matrix
   def initialize(lines)
     if lines.empty? then raise MatrixInputError.new end
 
     lines.reduce(nil) do |accum, line|
-      if !accum.nil? && accum != line.length then raise MatrixInputError.new end
+      if !accum.nil? && accum != line.length then
+        raise MatrixInputError.new, 'All rows must be the same width'
+      end
       line.length
     end
 
@@ -39,12 +64,8 @@ class Matrix
     @cur_y = 0
   end
 
-  def cur_value
-    @cells[@cur_y][@cur_x]
-  end
-
-  def cur_coords
-    [@cur_x, @cur_y]
+  def current
+    Cell.new(@cells[@cur_y][@cur_x], [@cur_x, @cur_y])
   end
 
   def right!
@@ -73,25 +94,47 @@ class Matrix
 
   def neighbors
     {
-      up: @cells.dig(@cur_y - 1, @cur_x),
-      down: @cells.dig(@cur_y + 1, @cur_x),
-      left: @cells.dig(@cur_y, @cur_x - 1),
-      right: @cells.dig(@cur_y, @cur_x + 1),
+      up: Cell.new(@cells.dig(@cur_y - 1, @cur_x), [@cur_y - 1, @cur_x]),
+      down: Cell.new(@cells.dig(@cur_y + 1, @cur_x), [@cur_y + 1, @cur_x]),
+      left: Cell.new(@cells.dig(@cur_y, @cur_x - 1), [@cur_y, @cur_x - 1]),
+      right: Cell.new(@cells.dig(@cur_y, @cur_x + 1), [@cur_y, @cur_x + 1]),
     }
   end
 end
 
-class Route
+class Direction
   DIRECTIONS = %i[up down left right].freeze
-  CORNER_CHAR = '+'
 
-  def initialize(matrix, initial_direction)
-    if !DIRECTIONS.include?(initial_direction) then
+  attr_reader :value
+
+  def initialize(dir)
+    if !DIRECTIONS.include?(dir) then
       raise RouteBadDirection.new
     end
+    @value = dir
+  end
 
+  def opposite_dir
+    {
+      down: :up,
+      up: :down,
+      right: :left,
+      left: :right,
+    }[@value]
+  end
+
+  def is_turn?(new_dir)
+    new_dir != @value && new_dir != opposite_dir
+  end
+
+end
+
+class Route
+  START_CHAR = '|'
+
+  def initialize(matrix, initial_direction)
     @matrix = matrix
-    @direction = initial_direction
+    @direction = Direction.new(initial_direction)
     @letters = []
 
     find_start
@@ -99,7 +142,7 @@ class Route
 
   def travel!
     loop do
-      case @direction
+      case @direction.value
         when :down
           @matrix.down!
         when :up
@@ -112,12 +155,12 @@ class Route
           raise RouteBadDirection.new
       end
 
-      if @matrix.cur_value.nil? || @matrix.cur_value == " " then
+      if @matrix.current.empty?  # we've reached the end, or so we hope
         break
       end
 
-      if /[A-Z]/.match(@matrix.cur_value) then
-        @letters.push(@matrix.cur_value)
+      if @matrix.current.letter?
+        @letters.push(@matrix.current.value)
       end
 
       update_direction!
@@ -125,44 +168,36 @@ class Route
   end
 
   def letters
-    return @letters
+    # there must be a nicer way to prevent accidental mutation
+    return @letters.map { |x| x }
   end
 
   private
 
   def update_direction!
-    if @matrix.cur_value != CORNER_CHAR then return end
+    if !@matrix.current.corner?
+      return
+    end
 
     new_dir = []
     @matrix.neighbors.each_pair do |key, value|
-      val_is_valid = ![nil, ' '].include?(value)
-      if key != @direction && key != opposite_dir && val_is_valid then
+      if @direction.is_turn?(key) && !value.empty?
         new_dir.push(key)
       end
     end
-    if new_dir.length != 1 then
-      raise RouteUnexpectedJunction.new
-    end
-    @direction = new_dir[0]
-  end
 
-  def opposite_dir
-    case @direction
-    when :down
-      :up
-    when :up
-      :down
-    when :left
-      :right
-    when :right
-      :left
+    if new_dir.length != 1
+      raise RouteUnexpectedJunction.new, 'An unexpected fork in the road'
     end
+
+    @direction = Direction.new(new_dir[0])
   end
 
   def find_start
     loop do
-      if @matrix.cur_value == '|' then break end
-
+      if @matrix.current.value == START_CHAR then
+        break
+      end
       @matrix.right!
     end
   end
