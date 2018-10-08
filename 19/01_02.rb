@@ -23,7 +23,7 @@ class RouteUnexpectedJunction < StandardError
 end
 
 class Cell
-  CORNER_CHAR = '+'
+  CORNER_CHAR = '+'.freeze
   LETTER = /[A-Z]/
 
   attr_reader :value
@@ -50,12 +50,13 @@ end
 
 class Matrix
   def initialize(lines)
-    if lines.empty? then raise MatrixInputError.new end
+    raise MatrixInputError.new if lines.empty?
 
     lines.reduce(nil) do |accum, line|
-      if !accum.nil? && accum != line.length then
+      if !accum.nil? && accum != line.length
         raise MatrixInputError.new, 'All rows must be the same width'
       end
+
       line.length
     end
 
@@ -69,13 +70,13 @@ class Matrix
   end
 
   def right!
-    if @cur_x + 1 >= @cells[0].length then raise MatrixBoundsError.new end
+    raise MatrixBoundsError.new if @cur_x + 1 >= @cells[0].length
 
     @cur_x += 1
   end
 
   def left!
-    if @cur_x - 1 < 0 then raise MatrixBoundsError.new end
+    raise MatrixBoundsError.new if @cur_x - 1 < 0
 
     @cur_x -= 1
   end
@@ -108,9 +109,8 @@ class Direction
   attr_reader :value
 
   def initialize(dir)
-    if !DIRECTIONS.include?(dir) then
-      raise RouteBadDirection.new
-    end
+    raise RouteBadDirection.new unless DIRECTIONS.include?(dir)
+
     @value = dir
   end
 
@@ -123,67 +123,63 @@ class Direction
     }[@value]
   end
 
-  def is_turn?(new_dir)
+  def turn?(new_dir)
     new_dir != @value && new_dir != opposite_dir
   end
 
 end
 
 class Route
-  START_CHAR = '|'
+  START_CHAR = '|'.freeze
+
+  attr_reader :steps
 
   def initialize(matrix, initial_direction)
     @matrix = matrix
     @direction = Direction.new(initial_direction)
     @letters = []
+    @steps = 0
 
     find_start
   end
 
   def travel!
     loop do
+      @steps += 1
+
       case @direction.value
-        when :down
-          @matrix.down!
-        when :up
-          @matrix.up!
-        when :left
-          @matrix.left!
-        when :right
-          @matrix.right!
-        else
-          raise RouteBadDirection.new
+      when :down
+        @matrix.down!
+      when :up
+        @matrix.up!
+      when :left
+        @matrix.left!
+      when :right
+        @matrix.right!
+      else
+        raise RouteBadDirection.new
       end
 
-      if @matrix.current.empty?  # we've reached the end, or so we hope
-        break
-      end
+      break if @matrix.current.empty? # we've reached the end, or so we hope
 
-      if @matrix.current.letter?
-        @letters.push(@matrix.current.value)
-      end
-
+      @letters.push(@matrix.current.value) if @matrix.current.letter?
       update_direction!
     end
   end
 
   def letters
     # there must be a nicer way to prevent accidental mutation
-    return @letters.map { |x| x }
+    @letters.map { |x| x }
   end
 
   private
 
   def update_direction!
-    if !@matrix.current.corner?
-      return
-    end
+    return if !@matrix.current.corner?
 
     new_dir = []
     @matrix.neighbors.each_pair do |key, value|
-      if @direction.is_turn?(key) && !value.empty?
-        new_dir.push(key)
-      end
+      new_dir.push(key) if @direction.turn?(key) && !value.empty?
     end
 
     if new_dir.length != 1
@@ -195,9 +191,8 @@ class Route
 
   def find_start
     loop do
-      if @matrix.current.value == START_CHAR then
-        break
-      end
+      break if @matrix.current.value == START_CHAR
+
       @matrix.right!
     end
   end
@@ -208,6 +203,5 @@ matrix = Matrix.new(lines)
 route = Route.new(matrix, :down)
 route.travel!
 
-if route.letters.join('') != 'GEPYAWTMLK'
-  raise 'wrong answer!'
-end
+raise 'wrong set of letters' if route.letters.join('') != 'GEPYAWTMLK'
+raise 'wrong number of steps' if route.steps != 17_628
