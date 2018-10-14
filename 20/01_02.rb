@@ -29,6 +29,20 @@ class Coord
     @y = y
     @z = z
   end
+
+  def ==(obj)
+    @x == obj.x && @y == obj.y && @z == obj.z
+  end
+
+  def eql?(obj)
+    @x == obj.x && @y == obj.y && @z == obj.z
+  end
+
+  def hash
+    bytes = []
+    [@x.to_s, @y.to_s, @z.to_s].join.each_byte { |b| bytes.push(b) }
+    bytes.map { |b| b.to_s }.join.to_i
+  end
 end
 
 particles = File.foreach('input.txt', "\n").map.with_index do |line, i|
@@ -37,6 +51,8 @@ particles = File.foreach('input.txt', "\n").map.with_index do |line, i|
   end
   Particle.new(i, *coords)
 end
+
+particles2 = Marshal.load(Marshal.dump(particles))
 
 1000.times do
   particles.each(&:move!)
@@ -49,3 +65,14 @@ end
 
 puts(closest.id)
 raise 'wrong answer' if closest.id != 161
+
+1000.times do
+  particles2.each(&:move!)
+  particles2.each do |p|
+    count = particles2.count { |e| e.position == p.position }
+    particles2.delete_if { |e| e.position == p.position } if count > 1
+  end
+end
+
+puts(particles2.length)
+raise 'wrong answer' if particles2.length != 438
