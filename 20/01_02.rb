@@ -30,18 +30,18 @@ class Coord
     @z = z
   end
 
-  def ==(obj)
-    @x == obj.x && @y == obj.y && @z == obj.z
+  def ==(other)
+    @x == other.x && @y == other.y && @z == other.z
   end
 
-  def eql?(obj)
-    @x == obj.x && @y == obj.y && @z == obj.z
+  def eql?(other)
+    @x == other.x && @y == other.y && @z == other.z
   end
 
   def hash
     bytes = []
     [@x.to_s, @y.to_s, @z.to_s].join.each_byte { |b| bytes.push(b) }
-    bytes.map { |b| b.to_s }.join.to_i
+    bytes.map(&:to_s).join.to_i
   end
 end
 
