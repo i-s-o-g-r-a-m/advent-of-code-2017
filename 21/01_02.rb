@@ -1,14 +1,12 @@
 class SquareMatrix
-  attr_reader :m
+  attr_reader :m, :size
 
   def initialize(data)
     @m = {}
-    @data = data.freeze
-    @size = data.split('/').length
-
-    raise 'oh no' if @size != data.split('/')[0].length
-
-    data.split('/').each.with_index do |line, row_idx|
+    @data = data
+    @size = @data.length
+    raise 'oh no' if @size != @data[0].length
+    @data.each.with_index do |line, row_idx|
       line.split('').each.with_index { |char, idx| @m[[row_idx, idx]] = char }
     end
   end
@@ -24,6 +22,7 @@ class SquareMatrix
         @m[[row_idx, col_idx]] = mirror_val
       end
     end
+    self
   end
 
   def flip_vert!
@@ -37,6 +36,7 @@ class SquareMatrix
         @m[[row_idx, mirror_idx]] = cur_val
       end
     end
+    self
   end
 
   def rotate_90!
@@ -57,40 +57,35 @@ class SquareMatrix
         @m[d] = c_val
       end
     end
+    self
   end
 
   def permutations
-    p = []
+    Enumerator.new do |y|
+      m = SquareMatrix.new(@data)
+      3.times do
+        m.rotate_90!
+        y.yield m.to_s
+      end
 
-    m = SquareMatrix.new(@data)
-    m.flip_horiz!
-    p.push(m.to_s)
+      horiz = SquareMatrix.new(@data)
+      horiz.flip_horiz!
+      y.yield horiz.to_s
 
-    m = SquareMatrix.new(@data)
-    m.flip_vert!
-    p.push(m.to_s)
+      3.times do
+        horiz.rotate_90!
+        y.yield horiz.to_s
+      end
 
-    m = SquareMatrix.new(@data)
-    m.flip_horiz!
-    2.times do
-      m.rotate_90!
-      p.push(m.to_s)
+      vert = SquareMatrix.new(@data)
+      vert.flip_vert!
+      y.yield vert.to_s
+
+      3.times do
+        vert.rotate_90!
+        y.yield vert.to_s
+      end
     end
-
-    m = SquareMatrix.new(@data)
-    m.flip_vert!
-    2.times do
-      m.rotate_90!
-      p.push(m.to_s)
-    end
-
-    m = SquareMatrix.new(@data)
-    2.times do
-      m.rotate_90!
-      p.push(m.to_s)
-    end
-
-    p
   end
 
   def to_s
@@ -145,10 +140,11 @@ class Image
     if !found.nil?
       found
     else
-      matrix = SquareMatrix.new(sq_str)
-      match = matrix.permutations.find { |p| !@rules[p].nil? }
-      raise "could not find match for #{sq_str}" if match.nil?
-      @rules[match]
+      matrix = SquareMatrix.new(sq_str.split('/'))
+      matrix.permutations.each do |p|
+        return @rules[p] unless @rules[p].nil?
+      end
+      raise "could not find match for #{sq_str}"
     end
   end
 
@@ -158,14 +154,15 @@ class Image
 
   def squares
     accum = []
-    square_size = div2? ? 2 : 3
+    rowz = rows
+    square_size = (rowz[0].length % 2).zero? ? 2 : 3
 
-    (0..rows.length - 1).step(square_size).each do |row_offset|
+    (0..rowz.length - 1).step(square_size).each do |row_offset|
       row = []
-      (0..rows[row_offset].length - 1).step(square_size).each do |col|
+      (0..rowz[row_offset].length - 1).step(square_size).each do |col|
         square = []
         (0..square_size - 1).each do |i|
-          square.push(rows[row_offset + i][col, square_size])
+          square.push(rowz[row_offset + i][col, square_size])
         end
         row.push(square)
       end
@@ -175,16 +172,12 @@ class Image
     accum
   end
 
-  def matrix
-    SquareMatrix.new(@data)
-  end
-
   def size
     rows[0].length
   end
 
-  def div2?
-    (rows[0].length % 2).zero?
+  def matrix
+    SquareMatrix.new(rows)
   end
 end
 
@@ -193,6 +186,8 @@ File.foreach('input.txt', "\n").map do |line|
   in_pattern, out_pattern = line.split(' => ')
   rules[in_pattern.strip] = out_pattern.strip
 end
+
+# part 1 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 image = Image.new('.#./..#/###', rules)
 
@@ -203,3 +198,15 @@ end
 on_count = image.matrix.to_s.count('#')
 puts on_count
 raise 'wrong answer' unless on_count == 110
+
+# part 2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+image = Image.new('.#./..#/###', rules)
+
+18.times do
+  image.enhance!
+end
+
+on_count = image.matrix.to_s.count('#')
+puts on_count
+raise 'wrong answer' unless on_count == 1_277_716
