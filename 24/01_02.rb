@@ -1,6 +1,3 @@
-require 'pp'
-require 'securerandom'
-
 ports = [
   [ 25, 13 ],
   [ 4, 43 ],
@@ -59,7 +56,7 @@ ports = [
   [ 3, 24 ],
   [ 7, 0 ],
   [ 50, 50 ],
-].map { |p| [p, p.object_id]}
+].map { |p| [p, p.object_id] }
 
 bridges = [
   [[[0, 0], 0]],
@@ -88,8 +85,20 @@ while true
   break if bridges.last.length == max_bridge_len
 end
 
+# part 1
 if max_bridge_strength == 1868
   puts max_bridge_strength
 else
   puts "wrong: #{max_bridge_strength}"
+end
+
+# part 2
+longest_bridge_strength = bridges
+  .select { |b| b.length == max_bridge_len }
+  .map { |b| b.map { |p| p[0].sum }.reduce(0) { |accum, s| accum + s } }
+  .max
+if longest_bridge_strength == 1841
+  puts longest_bridge_strength
+else
+  puts "wrong: #{longest_bridge_strength}"
 end
