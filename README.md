@@ -30,9 +30,10 @@ Observations:
 * The OCaml tooling and docs take a bit of effort to get going with, and in my case, editor support isn't excellent. Having some Elm experience is proving useful when it comes to making the language feel less alien than it might otherwise (though the compiler messages leave a lot to be desired by comparison to Elm). It will be interesting to compare the overall experience against Reason&#8217;s. I'm finding that `ocamlformat` is pretty nice.
 * Using [rbspy](https://rbspy.github.io/) and flamegraphs to profile Ruby code was nice. It provided a really quick and accessible way to identify areas of extreme slowness that could be easily optimized.
 
-TODO, in order of likelihood:
+Languages to try another year:
 * Reason
 * Swift
 * Rust
 * Kotlin
+* Haskell
 * C
